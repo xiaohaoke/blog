@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Tensor,深度学习,pytorch,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Tensor，又名张量，读者可能对这个名词似曾相识，因它不仅在PyTorch中出现过，它也Theano、TensorFlow、Torch和MxNet中重要的数据结构。关于张量的本质不乏深度的剖析，但从工程角度来讲，可简单地认为它就是一个数组，且支持高效的科学计算。它可以是一个数（标量）、一维数组（向量）、二维数组（矩阵）和更高维的数组（高阶数据）。Tensor和Numpy的ndarrays类似，但">
+<meta name="keywords" content="Tensor,深度学习,pytorch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tensor">
+<meta property="og:url" content="https://xiaohaoke.top/2019/12/17/Tensor/index.html">
+<meta property="og:site_name" content="xiaohaoke&#39;s blog">
+<meta property="og:description" content="Tensor，又名张量，读者可能对这个名词似曾相识，因它不仅在PyTorch中出现过，它也Theano、TensorFlow、Torch和MxNet中重要的数据结构。关于张量的本质不乏深度的剖析，但从工程角度来讲，可简单地认为它就是一个数组，且支持高效的科学计算。它可以是一个数（标量）、一维数组（向量）、二维数组（矩阵）和更高维的数组（高阶数据）。Tensor和Numpy的ndarrays类似，但">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-12-17T00:57:02.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Tensor">
+<meta name="twitter:description" content="Tensor，又名张量，读者可能对这个名词似曾相识，因它不仅在PyTorch中出现过，它也Theano、TensorFlow、Torch和MxNet中重要的数据结构。关于张量的本质不乏深度的剖析，但从工程角度来讲，可简单地认为它就是一个数组，且支持高效的科学计算。它可以是一个数（标量）、一维数组（向量）、二维数组（矩阵）和更高维的数组（高阶数据）。Tensor和Numpy的ndarrays类似，但">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://xiaohaoke.top/2019/12/17/Tensor/">
+
+
+
+
+
+  <title>Tensor | xiaohaoke's blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">xiaohaoke's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://xiaohaoke.top/2019/12/17/Tensor/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xiaohaoke">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/logo.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xiaohaoke's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Tensor</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-17T08:45:37+08:00">
+                2019-12-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Tensor，pytorch/" itemprop="url" rel="index">
+                    <span itemprop="name">Tensor，pytorch</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/12/17/Tensor/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/17/Tensor/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Tensor，又名张量，读者可能对这个名词似曾相识，因它不仅在PyTorch中出现过，它也Theano、TensorFlow、Torch和MxNet中重要的数据结构。关于张量的本质不乏深度的剖析，但从工程角度来讲，可简单地认为它就是一个数组，且支持高效的科学计算。它可以是一个数（标量）、一维数组（向量）、二维数组（矩阵）和更高维的数组（高阶数据）。Tensor和Numpy的ndarrays类似，但PyTorch的tensor支持GPU加速。<br><a id="more"></a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">从接口的角度来讲，对tensor的操作可分为两类：</span><br><span class="line"></span><br><span class="line"><span class="number">1.</span> `torch.function`，如`torch.save`等。</span><br><span class="line"><span class="number">2.</span> 另一类是`tensor.function`，如`tensor.view`等。</span><br><span class="line"></span><br><span class="line">为方便使用，对tensor的大部分操作同时支持这两类接口，在本书中不做具体区分，如`torch.sum (torch.sum(a, b))`与`tensor.sum (a.sum(b))`功能等价。</span><br><span class="line"></span><br><span class="line">而从存储的角度来讲，对tensor的操作又可分为两类：</span><br><span class="line"></span><br><span class="line"><span class="number">1.</span> 不会修改自身的数据，如 `a.add(b)`， 加法的结果会返回一个新的tensor。</span><br><span class="line"><span class="number">2.</span> 会修改自身的数据，如 `a.add_(b)`， 加法的结果仍存储在a中，a被修改了。</span><br><span class="line"></span><br><span class="line">函数名以`_`结尾的都是inplace方式, 即会修改调用者自己的数据，在实际应用中需加以区分。</span><br></pre></td></tr></table></figure>
+<p>常见新建tensor的方法</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">函数</th>
+<th style="text-align:center">功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">Tensor(*sizes)</td>
+<td style="text-align:center">基础构造函数</td>
+</tr>
+<tr>
+<td style="text-align:center">tensor(data,)</td>
+<td style="text-align:center">类似np.array的构造函数</td>
+</tr>
+<tr>
+<td style="text-align:center">ones(*sizes)</td>
+<td style="text-align:center">全1Tensor</td>
+</tr>
+<tr>
+<td style="text-align:center">zeros(*sizes)</td>
+<td style="text-align:center">全0Tensor</td>
+</tr>
+<tr>
+<td style="text-align:center">eye(*sizes)</td>
+<td style="text-align:center">对角线为1，其他为0</td>
+</tr>
+<tr>
+<td style="text-align:center">arange(s,e,step</td>
+<td style="text-align:center">从s到e，步长为step</td>
+</tr>
+<tr>
+<td style="text-align:center">linspace(s,e,steps)</td>
+<td style="text-align:center">从s到e，均匀切分成steps份</td>
+</tr>
+<tr>
+<td style="text-align:center">rand/randn(*sizes)</td>
+<td style="text-align:center">均匀/标准分布</td>
+</tr>
+<tr>
+<td style="text-align:center">normal(mean,std)/uniform(from,to)</td>
+<td style="text-align:center">正态分布/均匀分布</td>
+</tr>
+<tr>
+<td style="text-align:center">randperm(m)</td>
+<td style="text-align:center">随机排列</td>
+</tr>
+</tbody>
+</table>
+<p>这些创建方法都可以在创建的时候指定数据类型dtype和存放device(cpu/gpu).</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定tensor的形状</span></span><br><span class="line">a = t.Tensor(<span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">a <span class="comment"># 数值取决于内存空间的状态，print时候可能overflow</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 用list的数据创建tensor</span></span><br><span class="line">b = t.Tensor([[<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>],[<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>]])</span><br><span class="line">b</span><br><span class="line"></span><br><span class="line">b.tolist() <span class="comment"># 把tensor转为list</span></span><br><span class="line"></span><br><span class="line">`tensor.size()`返回`torch.Size`对象，它是tuple的子类，但其使用方式与tuple略有区别</span><br><span class="line"></span><br><span class="line">b_size = b.size()</span><br><span class="line">b_size</span><br><span class="line"></span><br><span class="line">b.numel() <span class="comment"># b中元素总个数，2*3，等价于b.nelement()</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建一个和b形状一样的tensor</span></span><br><span class="line">c = t.Tensor(b_size)</span><br><span class="line"><span class="comment"># 创建一个元素为2和3的tensor</span></span><br><span class="line">d = t.Tensor((<span class="number">2</span>, <span class="number">3</span>))</span><br><span class="line">c, d</span><br><span class="line"></span><br><span class="line">除了`tensor.size()`，还可以利用`tensor.shape`直接查看tensor的形状，`tensor.shape`等价于`tensor.size()`</span><br><span class="line"></span><br><span class="line">c.shape</span><br><span class="line"></span><br><span class="line">需要注意的是，`t.Tensor(*sizes)`创建tensor时，系统不会马上分配空间，只是会计算剩余的内存是否足够使用，使用到tensor时才会分配，而其它操作都是在创建完tensor之后马上进行空间分配。其它常用的创建tensor的方法举例如下。</span><br><span class="line"></span><br><span class="line">t.ones(<span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">t.zeros(<span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">t.arange(<span class="number">1</span>, <span class="number">6</span>, <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">t.linspace(<span class="number">1</span>, <span class="number">10</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">t.randn(<span class="number">2</span>, <span class="number">3</span>, device=t.device(<span class="string">'cpu'</span>))</span><br><span class="line"></span><br><span class="line">t.randperm(<span class="number">5</span>) <span class="comment"># 长度为5的随机排列</span></span><br><span class="line"></span><br><span class="line">t.eye(<span class="number">2</span>, <span class="number">3</span>, dtype=t.int) <span class="comment"># 对角线为1, 不要求行列数一致</span></span><br><span class="line"></span><br><span class="line">`torch.tensor`是在<span class="number">0.4</span>版本新增加的一个新版本的创建tensor方法，使用的方法，和参数几乎和`np.array`完全一致</span><br><span class="line"></span><br><span class="line">scalar = t.tensor(<span class="number">3.14159</span>) </span><br><span class="line">print(<span class="string">'scalar: %s, shape of sclar: %s'</span> %(scalar, scalar.shape))</span><br><span class="line"></span><br><span class="line">vector = t.tensor([<span class="number">1</span>, <span class="number">2</span>])</span><br><span class="line">print(<span class="string">'vector: %s, shape of vector: %s'</span> %(vector, vector.shape))</span><br><span class="line"></span><br><span class="line">tensor = t.Tensor(<span class="number">1</span>,<span class="number">2</span>) <span class="comment"># 注意和t.tensor([1, 2])的区别</span></span><br><span class="line">tensor.shape</span><br><span class="line"></span><br><span class="line">matrix = t.tensor([[<span class="number">0.1</span>, <span class="number">1.2</span>], [<span class="number">2.2</span>, <span class="number">3.1</span>], [<span class="number">4.9</span>, <span class="number">5.2</span>]])</span><br><span class="line">matrix,matrix.shape</span><br><span class="line"></span><br><span class="line">t.tensor([[<span class="number">0.11111</span>, <span class="number">0.222222</span>, <span class="number">0.3333333</span>]],</span><br><span class="line">                     dtype=t.float64,</span><br><span class="line">                     device=t.device(<span class="string">'cpu'</span>))</span><br><span class="line"></span><br><span class="line">empty_tensor = t.tensor([])</span><br><span class="line">empty_tensor.shape</span><br></pre></td></tr></table></figure>
+<h4 id="常用Tensor操作"><a href="#常用Tensor操作" class="headerlink" title="常用Tensor操作"></a>常用Tensor操作</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">通过`tensor.view`方法可以调整tensor的形状，但必须保证调整前后元素总数一致。`view`不会修改自身的数据，返回的新tensor与源tensor共享内存，也即更改其中的一个，另外一个也会跟着改变。在实际应用中可能经常需要添加或减少某一维度，这时候`squeeze`和`unsqueeze`两个函数就派上用场了。</span><br><span class="line"></span><br><span class="line">a = t.arange(<span class="number">0</span>, <span class="number">6</span>)</span><br><span class="line">a.view(<span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">b = a.view(<span class="number">-1</span>, <span class="number">3</span>) <span class="comment"># 当某一维为-1的时候，会自动计算它的大小</span></span><br><span class="line">b.shape</span><br><span class="line"></span><br><span class="line">b.unsqueeze(<span class="number">1</span>) <span class="comment"># 注意形状，在第1维（下标从0开始）上增加“１” </span></span><br><span class="line"><span class="comment">#等价于 b[:,None]</span></span><br><span class="line">b[:, <span class="literal">None</span>].shape</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">b.unsqueeze(<span class="number">-2</span>) <span class="comment"># -2表示倒数第二个维度</span></span><br><span class="line"></span><br><span class="line">c = b.view(<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">c.squeeze(<span class="number">0</span>) <span class="comment"># 压缩第0维的“１”</span></span><br><span class="line"></span><br><span class="line">c.squeeze() <span class="comment"># 把所有维度为“1”的压缩</span></span><br><span class="line"></span><br><span class="line">a[<span class="number">1</span>] = <span class="number">100</span></span><br><span class="line">b <span class="comment"># a修改，b作为view之后的，也会跟着修改</span></span><br></pre></td></tr></table></figure>
+<h5 id="resize是另一种可用来调整size的方法，但与view-不同，它可以修改tensor的大小。如果新大小超过了原大小，会自动分配新的内存空间，而如果新大小小于原大小，则之前的数据依旧会被保存，看一个例子。"><a href="#resize是另一种可用来调整size的方法，但与view-不同，它可以修改tensor的大小。如果新大小超过了原大小，会自动分配新的内存空间，而如果新大小小于原大小，则之前的数据依旧会被保存，看一个例子。" class="headerlink" title="resize是另一种可用来调整size的方法，但与view`不同，它可以修改tensor的大小。如果新大小超过了原大小，会自动分配新的内存空间，而如果新大小小于原大小，则之前的数据依旧会被保存，看一个例子。"></a>resize<code>是另一种可用来调整</code>size<code>的方法，但与</code>view`不同，它可以修改tensor的大小。如果新大小超过了原大小，会自动分配新的内存空间，而如果新大小小于原大小，则之前的数据依旧会被保存，看一个例子。</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">b.resize_(<span class="number">1</span>, <span class="number">3</span>)</span><br><span class="line">b</span><br><span class="line"></span><br><span class="line">b.resize_(<span class="number">3</span>, <span class="number">3</span>) <span class="comment"># 旧的数据依旧保存着，多出的大小会分配新空间</span></span><br><span class="line">b</span><br></pre></td></tr></table></figure>
+<h4 id="索引操作"><a href="#索引操作" class="headerlink" title="索引操作"></a>索引操作</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">Tensor支持与numpy.ndarray类似的索引操作，语法上也类似，下面通过一些例子，讲解常用的索引操作。如无特殊说明，索引出来的结果与原tensor共享内存，也即修改一个，另一个会跟着修改。</span><br><span class="line"></span><br><span class="line">a = t.randn(<span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line">a</span><br><span class="line"></span><br><span class="line">a[<span class="number">0</span>] <span class="comment"># 第0行(下标从0开始)</span></span><br><span class="line"></span><br><span class="line">a[:, <span class="number">0</span>] <span class="comment"># 第0列</span></span><br><span class="line"></span><br><span class="line">a[<span class="number">0</span>][<span class="number">2</span>] <span class="comment"># 第0行第2个元素，等价于a[0, 2]</span></span><br><span class="line"></span><br><span class="line">a[<span class="number">0</span>, <span class="number">-1</span>] <span class="comment"># 第0行最后一个元素</span></span><br><span class="line"></span><br><span class="line">a[:<span class="number">2</span>] <span class="comment"># 前两行</span></span><br><span class="line"></span><br><span class="line">a[:<span class="number">2</span>, <span class="number">0</span>:<span class="number">2</span>] <span class="comment"># 前两行，第0,1列</span></span><br><span class="line"></span><br><span class="line">print(a[<span class="number">0</span>:<span class="number">1</span>, :<span class="number">2</span>]) <span class="comment"># 第0行，前两列 </span></span><br><span class="line">print(a[<span class="number">0</span>, :<span class="number">2</span>]) <span class="comment"># 注意两者的区别：形状不同</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># None类似于np.newaxis, 为a新增了一个轴</span></span><br><span class="line"><span class="comment"># 等价于a.view(1, a.shape[0], a.shape[1])</span></span><br><span class="line">a[<span class="literal">None</span>].shape</span><br><span class="line"></span><br><span class="line">a[<span class="literal">None</span>].shape <span class="comment"># 等价于a[None,:,:]</span></span><br><span class="line"></span><br><span class="line">a[:,<span class="literal">None</span>,:].shape</span><br><span class="line"></span><br><span class="line">a[:,<span class="literal">None</span>,:,<span class="literal">None</span>,<span class="literal">None</span>].shape</span><br><span class="line"></span><br><span class="line">a &gt; <span class="number">1</span> <span class="comment"># 返回一个ByteTensor</span></span><br><span class="line"></span><br><span class="line">a[a&gt;<span class="number">1</span>] <span class="comment"># 等价于a.masked_select(a&gt;1)</span></span><br><span class="line"><span class="comment"># 选择结果与原tensor不共享内存空间</span></span><br><span class="line"></span><br><span class="line">a[t.LongTensor([<span class="number">0</span>,<span class="number">1</span>])] <span class="comment"># 第0行和第1行</span></span><br></pre></td></tr></table></figure>
+<h4 id="常用的选择函数"><a href="#常用的选择函数" class="headerlink" title="常用的选择函数"></a>常用的选择函数</h4><table>
+<thead>
+<tr>
+<th style="text-align:center">函数</th>
+<th style="text-align:center">功能</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">index_select(input, dim, index)</td>
+<td style="text-align:center">在指定维度dim上选取，比如选取某些行、某些列</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center">masked_select(input, mask)</td>
+<td style="text-align:center">例子如上，a[a&gt;0]，使用ByteTensor进行选取</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center">non_zero(input)</td>
+<td style="text-align:center">非0元素的下标</td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center">gather(input, dim, index)</td>
+<td style="text-align:center">根据index，在dim维度上选取数据，输出的size与index一样</td>
+</tr>
+</tbody>
+</table>
+<p><code>gather</code>是一个比较复杂的操作，对一个2维tensor，输出的每个元素如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">out[i][j] = input[index[i][j]][j]  <span class="comment"># dim=0</span></span><br><span class="line">out[i][j] = input[i][index[i][j]]  <span class="comment"># dim=1</span></span><br></pre></td></tr></table></figure>
+<h4 id="逐元素操作"><a href="#逐元素操作" class="headerlink" title="逐元素操作"></a>逐元素操作</h4><p>这部分操作会对tensor的每一个元素(point-wise，又名element-wise)进行操作，此类操作的输入与输出形状一致。常用的操作如表3-4所示。</p>
+<p>表3-4: 常见的逐元素操作</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">函数</th>
+<th style="text-align:center">功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">abs/sqrt/div/exp/fmod/log/pow..</td>
+<td style="text-align:center">绝对值/平方根/除法/指数/求余/求幂..</td>
+</tr>
+<tr>
+<td style="text-align:center">cos/sin/asin/atan2/cosh..</td>
+<td style="text-align:center">相关三角函数</td>
+</tr>
+<tr>
+<td style="text-align:center">ceil/round/floor/trunc</td>
+<td style="text-align:center">上取整/四舍五入/下取整/只保留整数部分</td>
+</tr>
+<tr>
+<td style="text-align:center">clamp(input, min, max)</td>
+<td style="text-align:center">超过min和max部分截断</td>
+</tr>
+<tr>
+<td style="text-align:center">sigmod/tanh..</td>
+<td style="text-align:center">激活函数</td>
+</tr>
+</tbody>
+</table>
+<p>对于很多操作，例如div、mul、pow、fmod等，PyTorch都实现了运算符重载，所以可以直接使用运算符。如<code>a ** 2</code> 等价于<code>torch.pow(a,2)</code>, <code>a * 2</code>等价于<code>torch.mul(a,2)</code>。</p>
+<h4 id="归并操作"><a href="#归并操作" class="headerlink" title="归并操作"></a>归并操作</h4><p>此类操作会使输出形状小于输入形状，并可以沿着某一维度进行指定操作。如加法<code>sum</code>，既可以计算整个tensor的和，也可以计算tensor中每一行或每一列的和。常用的归并操作如表3-5所示。</p>
+<p>表3-5: 常用归并操作</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">函数</th>
+<th style="text-align:center">功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">mean/sum/median/mode</td>
+<td style="text-align:center">均值/和/中位数/众数</td>
+</tr>
+<tr>
+<td style="text-align:center">norm/dist</td>
+<td style="text-align:center">范数/距离</td>
+</tr>
+<tr>
+<td style="text-align:center">std/var</td>
+<td style="text-align:center">标准差/方差</td>
+</tr>
+<tr>
+<td style="text-align:center">cumsum/cumprod</td>
+<td style="text-align:center">累加/累乘</td>
+</tr>
+</tbody>
+</table>
+<p>以上大多数函数都有一个参数<strong><code>dim</code></strong>，用来指定这些操作是在哪个维度上执行的。关于dim(对应于Numpy中的axis)的解释众说纷纭，这里提供一个简单的记忆方式：</p>
+<p>假设输入的形状是(m, n, k)</p>
+<ul>
+<li>如果指定dim=0，输出的形状就是(1, n, k)或者(n, k)</li>
+<li>如果指定dim=1，输出的形状就是(m, 1, k)或者(m, k)</li>
+<li>如果指定dim=2，输出的形状就是(m, n, 1)或者(m, n)</li>
+</ul>
+<p>size中是否有”1”，取决于参数<code>keepdim</code>，<code>keepdim=True</code>会保留维度<code>1</code>。注意，以上只是经验总结，并非所有函数都符合这种形状变化方式，如<code>cumsum</code>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">b = t.ones(<span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">b.sum(dim = <span class="number">0</span>, keepdim=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># keepdim=False，不保留维度"1"，注意形状</span></span><br><span class="line">b.sum(dim=<span class="number">0</span>, keepdim=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">b.sum(dim=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">a = t.arange(<span class="number">0</span>, <span class="number">6</span>).view(<span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">print(a)</span><br><span class="line">a.cumsum(dim=<span class="number">1</span>) <span class="comment"># 沿着行累加</span></span><br></pre></td></tr></table></figure>
+<h4 id="比较"><a href="#比较" class="headerlink" title="比较"></a>比较</h4><p>比较函数中有一些是逐元素比较，操作类似于逐元素操作，还有一些则类似于归并操作。常用比较函数如表3-6所示。</p>
+<p>表3-6: 常用比较函数</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">函数</th>
+<th style="text-align:center">功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">gt/lt/ge/le/eq/ne</td>
+<td style="text-align:center">大于/小于/大于等于/小于等于/等于/不等</td>
+</tr>
+<tr>
+<td style="text-align:center">topk</td>
+<td style="text-align:center">最大的k个数</td>
+</tr>
+<tr>
+<td style="text-align:center">sort</td>
+<td style="text-align:center">排序</td>
+</tr>
+<tr>
+<td style="text-align:center">max/min</td>
+<td style="text-align:center">比较两个tensor最大最小值</td>
+</tr>
+</tbody>
+</table>
+<p>表中第一行的比较操作已经实现了运算符重载，因此可以使用<code>a&gt;=b</code>、<code>a&gt;b</code>、<code>a!=b</code>、<code>a==b</code>，其返回结果是一个<code>ByteTensor</code>，可用来选取元素。max/min这两个操作比较特殊，以max来说，它有以下三种使用情况：</p>
+<ul>
+<li>t.max(tensor)：返回tensor中最大的一个数</li>
+<li>t.max(tensor,dim)：指定维上最大的数，返回tensor和下标</li>
+<li>t.max(tensor1, tensor2): 比较两个tensor相比较大的元素</li>
+</ul>
+<p>至于比较一个tensor和一个数，可以使用clamp函数。下面举例说明。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">a = t.linspace(<span class="number">0</span>, <span class="number">15</span>, <span class="number">6</span>).view(<span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">a</span><br><span class="line"></span><br><span class="line">b = t.linspace(<span class="number">15</span>, <span class="number">0</span>, <span class="number">6</span>).view(<span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">b</span><br><span class="line"></span><br><span class="line">a&gt;b</span><br><span class="line"></span><br><span class="line">a[a&gt;b] <span class="comment"># a中大于b的元素</span></span><br><span class="line"></span><br><span class="line">t.max(a)</span><br><span class="line"></span><br><span class="line">t.max(b, dim=<span class="number">1</span>) </span><br><span class="line"><span class="comment"># 第一个返回值的15和6分别表示第0行和第1行最大的元素</span></span><br><span class="line"><span class="comment"># 第二个返回值的0和0表示上述最大的数是该行第0个元素</span></span><br><span class="line"></span><br><span class="line">t.max(a,b)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 比较a和10较大的元素</span></span><br><span class="line">t.clamp(a, min=<span class="number">10</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="线性代数"><a href="#线性代数" class="headerlink" title="线性代数"></a>线性代数</h4><p>PyTorch的线性函数主要封装了Blas和Lapack，其用法和接口都与之类似。常用的线性代数函数如表3-7所示。</p>
+<p>表3-7: 常用的线性代数函数</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">函数</th>
+<th style="text-align:center">功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">trace</td>
+<td style="text-align:center">对角线元素之和(矩阵的迹)</td>
+</tr>
+<tr>
+<td style="text-align:center">diag</td>
+<td style="text-align:center">对角线元素</td>
+</tr>
+<tr>
+<td style="text-align:center">triu/tril</td>
+<td style="text-align:center">矩阵的上三角/下三角，可指定偏移量</td>
+</tr>
+<tr>
+<td style="text-align:center">mm/bmm</td>
+<td style="text-align:center">矩阵乘法，batch的矩阵乘法</td>
+</tr>
+<tr>
+<td style="text-align:center">addmm/addbmm/addmv/addr/badbmm..</td>
+<td style="text-align:center">矩阵运算</td>
+</tr>
+<tr>
+<td style="text-align:center">t</td>
+<td style="text-align:center">转置</td>
+</tr>
+<tr>
+<td style="text-align:center">dot/cross</td>
+<td style="text-align:center">内积/外积</td>
+</tr>
+<tr>
+<td style="text-align:center">inverse</td>
+<td style="text-align:center">求逆矩阵</td>
+</tr>
+<tr>
+<td style="text-align:center">svd</td>
+<td style="text-align:center">奇异值分解</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">In: b = a.t()</span><br><span class="line">b.is_contiguous()</span><br><span class="line">out: false</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[In]:b.contiguous()</span><br><span class="line">out: <span class="number">0</span>   <span class="number">9</span></span><br><span class="line">     <span class="number">3</span>   <span class="number">12</span></span><br><span class="line">     <span class="number">6</span>   <span class="number">15</span></span><br><span class="line">     [torch.FloatTensor of size <span class="number">3</span>*<span class="number">2</span>]</span><br></pre></td></tr></table></figure>
+<p>ensor和Numpy数组之间具有很高的相似性，彼此之间的互操作也非常简单高效。需要注意的是，Numpy和Tensor共享内存。由于Numpy历史悠久，支持丰富的操作，所以当遇到Tensor不支持的操作时，可先转成Numpy数组，处理后再转回tensor，其转换开销很小。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line">a = np.ones([<span class="number">2</span>, <span class="number">3</span>],dtype=np.float32)</span><br><span class="line">a</span><br><span class="line"></span><br><span class="line">b = t.from_numpy(a)</span><br><span class="line">b</span><br><span class="line"></span><br><span class="line">b = t.Tensor(a) <span class="comment"># 也可以直接将numpy对象传入Tensor</span></span><br><span class="line">b</span><br><span class="line"></span><br><span class="line">a[<span class="number">0</span>, <span class="number">1</span>]=<span class="number">100</span></span><br><span class="line">b</span><br><span class="line"></span><br><span class="line">c = b.numpy() <span class="comment"># a, b, c三个对象共享内存</span></span><br><span class="line">c</span><br><span class="line"></span><br><span class="line">**注意**： 当numpy的数据类型和Tensor的类型不一样的时候，数据会被复制，不会共享内存。</span><br><span class="line"></span><br><span class="line">a = np.ones([<span class="number">2</span>, <span class="number">3</span>])</span><br><span class="line"><span class="comment"># 注意和上面的a的区别（dtype不是float32）</span></span><br><span class="line">a.dtype</span><br><span class="line"></span><br><span class="line">b = t.Tensor(a) <span class="comment"># 此处进行拷贝，不共享内存</span></span><br><span class="line">b.dtype</span><br><span class="line"></span><br><span class="line">c = t.from_numpy(a) <span class="comment"># 注意c的类型（DoubleTensor）</span></span><br><span class="line">c</span><br><span class="line"></span><br><span class="line">a[<span class="number">0</span>, <span class="number">1</span>] = <span class="number">100</span></span><br><span class="line">b <span class="comment"># b与a不共享内存，所以即使a改变了，b也不变</span></span><br><span class="line"></span><br><span class="line">c <span class="comment"># c与a共享内存</span></span><br><span class="line"></span><br><span class="line">**注意：** 不论输入的类型是什么，t.tensor都会进行数据拷贝，不会共享内存</span><br><span class="line"></span><br><span class="line">tensor = t.tensor(a) </span><br><span class="line"></span><br><span class="line">tensor[<span class="number">0</span>,<span class="number">0</span>]=<span class="number">0</span></span><br><span class="line">a</span><br></pre></td></tr></table></figure>
+<p>广播法则(broadcast)是科学运算中经常使用的一个技巧，它在快速执行向量化的同时不会占用额外的内存/显存。<br>Numpy的广播法则定义如下：</p>
+<ul>
+<li>让所有输入数组都向其中shape最长的数组看齐，shape中不足的部分通过在前面加1补齐</li>
+<li>两个数组要么在某一个维度的长度一致，要么其中一个为1，否则不能计算 </li>
+<li>当输入数组的某个维度的长度为1时，计算时沿此维度复制扩充成一样的形状</li>
+</ul>
+<p>PyTorch当前已经支持了自动广播法则，但是笔者还是建议读者通过以下两个函数的组合手动实现广播法则，这样更直观，更不易出错：</p>
+<ul>
+<li><code>unsqueeze</code>或者<code>view</code>，或者tensor[None],：为数据某一维的形状补1，实现法则1</li>
+<li><code>expand</code>或者<code>expand_as</code>，重复数组，实现法则3；该操作不会复制数组，所以不会占用额外的空间。</li>
+</ul>
+<p>注意，repeat实现与expand相类似的功能，但是repeat会把相同数据复制多份，因此会占用额外的空间</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">a = t.ones(<span class="number">3</span>, <span class="number">2</span>)</span><br><span class="line">b = t.zeros(<span class="number">2</span>, <span class="number">3</span>,<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 自动广播法则</span></span><br><span class="line"><span class="comment"># 第一步：a是2维,b是3维，所以先在较小的a前面补1 ，</span></span><br><span class="line"><span class="comment">#               即：a.unsqueeze(0)，a的形状变成（1，3，2），b的形状是（2，3，1）,</span></span><br><span class="line"><span class="comment"># 第二步:   a和b在第一维和第三维形状不一样，其中一个为1 ，</span></span><br><span class="line"><span class="comment">#               可以利用广播法则扩展，两个形状都变成了（2，3，2）</span></span><br><span class="line">a+b</span><br><span class="line"></span><br><span class="line"><span class="comment"># 手动广播法则</span></span><br><span class="line"><span class="comment"># 或者 a.view(1,3,2).expand(2,3,2)+b.expand(2,3,2)</span></span><br><span class="line">a[<span class="literal">None</span>].expand(<span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>) + b.expand(<span class="number">2</span>,<span class="number">3</span>,<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># expand不会占用额外空间，只会在需要的时候才扩充，可极大节省内存</span></span><br><span class="line">e = a.unsqueeze(<span class="number">0</span>).expand(<span class="number">10000000000000</span>, <span class="number">3</span>,<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="持久化"><a href="#持久化" class="headerlink" title="持久化"></a>持久化</h4><p>Tensor的保存和加载十分的简单，使用t.save和t.load即可完成相应的功能。在save/load时可指定使用的<code>pickle</code>模块，在load时还可将GPU tensor映射到CPU或其它GPU上。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> t.cuda.is_available():</span><br><span class="line">    a = a.cuda(<span class="number">1</span>) <span class="comment"># 把a转为GPU1上的tensor,</span></span><br><span class="line">    t.save(a,<span class="string">'a.pth'</span>)</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 加载为b, 存储于GPU1上(因为保存时tensor就在GPU1上)</span></span><br><span class="line">b = t.load(<span class="string">'a.pth'</span>)</span><br><span class="line"><span class="comment"># 加载为c, 存储于CPU</span></span><br><span class="line">c = t.load(<span class="string">'a.pth'</span>, map_location=<span class="keyword">lambda</span> storage, loc: storage)</span><br><span class="line"><span class="comment"># 加载为d, 存储于GPU0上</span></span><br><span class="line">d = t.load(<span class="string">'a.pth'</span>, map_location=&#123;<span class="string">'cuda:1'</span>:<span class="string">'cuda:0'</span>&#125;)</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Tensor-深度学习-pytorch/" rel="tag"># Tensor,深度学习,pytorch</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/11/11/opencv-3/" rel="next" title="opencv">
+                <i class="fa fa-chevron-left"></i> opencv
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/12/17/ResNets/" rel="prev" title="ResNets">
+                ResNets <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/uploads/logo.jpg" alt="xiaohaoke">
+            
+              <p class="site-author-name" itemprop="name">xiaohaoke</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#常用Tensor操作"><span class="nav-number">1.</span> <span class="nav-text">常用Tensor操作</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#resize是另一种可用来调整size的方法，但与view-不同，它可以修改tensor的大小。如果新大小超过了原大小，会自动分配新的内存空间，而如果新大小小于原大小，则之前的数据依旧会被保存，看一个例子。"><span class="nav-number">1.1.</span> <span class="nav-text">resize是另一种可用来调整size的方法，但与view`不同，它可以修改tensor的大小。如果新大小超过了原大小，会自动分配新的内存空间，而如果新大小小于原大小，则之前的数据依旧会被保存，看一个例子。</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#索引操作"><span class="nav-number">2.</span> <span class="nav-text">索引操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#常用的选择函数"><span class="nav-number">3.</span> <span class="nav-text">常用的选择函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#逐元素操作"><span class="nav-number">4.</span> <span class="nav-text">逐元素操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#归并操作"><span class="nav-number">5.</span> <span class="nav-text">归并操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#比较"><span class="nav-number">6.</span> <span class="nav-text">比较</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#线性代数"><span class="nav-number">7.</span> <span class="nav-text">线性代数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#持久化"><span class="nav-number">8.</span> <span class="nav-text">持久化</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xiaohaoke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://xiaohaoke.top/2019/12/17/Tensor/';
+          this.page.identifier = '2019/12/17/Tensor/';
+          this.page.title = 'Tensor';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

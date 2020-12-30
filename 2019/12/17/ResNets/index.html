@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="引言深度残差网络（Deep residual network, ResNet）的提出是CNN图像史上的一件里程碑事件，让我们先看一下ResNet在ILSVRC和COCO 2015上的战绩： 图1 ResNet在ILSVRC和COCO 2015上的战绩 ResNet取得了5项第一，并又一次刷新了CNN模型在ImageNet上的历史： 图2 ImageNet分类Top-5误差 ResNet的作者何凯明">
+<meta name="keywords" content="xiaohaoke">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ResNets">
+<meta property="og:url" content="https://xiaohaoke.top/2019/12/17/ResNets/index.html">
+<meta property="og:site_name" content="xiaohaoke&#39;s blog">
+<meta property="og:description" content="引言深度残差网络（Deep residual network, ResNet）的提出是CNN图像史上的一件里程碑事件，让我们先看一下ResNet在ILSVRC和COCO 2015上的战绩： 图1 ResNet在ILSVRC和COCO 2015上的战绩 ResNet取得了5项第一，并又一次刷新了CNN模型在ImageNet上的历史： 图2 ImageNet分类Top-5误差 ResNet的作者何凯明">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pic1.zhimg.com/80/v2-5e98ec97def099a4e6fb6b7ce3b1d460_hd.jpg">
+<meta property="og:image" content="https://pic3.zhimg.com/80/v2-606573bdaaa97de6b8b10fb00f76d29a_hd.jpg">
+<meta property="og:image" content="https://pic2.zhimg.com/80/v2-dcf5688dad675cbe8fb8be243af5e1fd_hd.jpg">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=x">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=H%28x%29">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=F%28x%29%3DH%28x%29-x">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=F%28x%29%2Bx">
+<meta property="og:image" content="https://pic4.zhimg.com/80/v2-252e6d9979a2a91c2d3033b9b73eb69f_hd.jpg">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=%5Cbegin%7Balign%7D+%26+%7B%7By%7D_%7Bl%7D%7D%3Dh%28%7B%7Bx%7D_%7Bl%7D%7D%29%2BF%28%7B%7Bx%7D_%7Bl%7D%7D%2C%7B%7BW%7D_%7Bl%7D%7D%29+%5C%5C+%26+%7B%7Bx%7D_%7Bl%2B1%7D%7D%3Df%28%7B%7By%7D_%7Bl%7D%7D%29+%5C%5C+%5Cend%7Balign%7D+">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=x_%7Bl%7D">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=x_%7Bl%2B1%7D">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=l">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=F">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=h%28x_%7Bl%7D%29%3Dx_%7Bl%7D">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=f">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=l">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=L">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=%7B%7Bx%7D_%7BL%7D%7D%3D%7B%7Bx%7D_%7Bl%7D%7D%2B%5Csum%5Climits_%7Bi%3Dl%7D%5E%7BL-1%7D%7BF%28%7B%7Bx%7D_%7Bi%7D%7D%7D%2C%7B%7BW%7D_%7Bi%7D%7D%29">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=%5Cfrac%7B%5Cpartial+loss%7D%7B%5Cpartial+%7B%7Bx%7D_%7Bl%7D%7D%7D%3D%5Cfrac%7B%5Cpartial+loss%7D%7B%5Cpartial+%7B%7Bx%7D_%7BL%7D%7D%7D%5Ccdot+%5Cfrac%7B%5Cpartial+%7B%7Bx%7D_%7BL%7D%7D%7D%7B%5Cpartial+%7B%7Bx%7D_%7Bl%7D%7D%7D%3D%5Cfrac%7B%5Cpartial+loss%7D%7B%5Cpartial+%7B%7Bx%7D_%7BL%7D%7D%7D%5Ccdot+%5Cleft%28+1%2B%5Cfrac%7B%5Cpartial+%7D%7B%5Cpartial+%7B%7Bx%7D_%7BL%7D%7D%7D%5Csum%5Climits_%7Bi%3Dl%7D%5E%7BL-1%7D%7BF%28%7B%7Bx%7D_%7Bi%7D%7D%2C%7B%7BW%7D_%7Bi%7D%7D%29%7D+%5Cright%29">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=%5Cfrac%7B%5Cpartial+loss%7D%7B%5Cpartial+%7B%7Bx%7D_%7BL%7D%7D%7D">
+<meta property="og:image" content="https://www.zhihu.com/equation?tex=L">
+<meta property="og:image" content="https://pic2.zhimg.com/80/v2-7cb9c03871ab1faa7ca23199ac403bd9_hd.jpg">
+<meta property="og:image" content="https://pic1.zhimg.com/80/v2-1dfd4022d4be28392ff44c49d6b4ed94_hd.jpg">
+<meta property="og:image" content="https://pic1.zhimg.com/80/v2-0892e5423616c30f69ded61111b111c0_hd.jpg">
+<meta property="og:image" content="https://pic2.zhimg.com/80/v2-ac88d9e118e3a85922188daba84f7efd_hd.jpg">
+<meta property="og:image" content="https://pic4.zhimg.com/80/v2-0a2c8a209a221817f91c1f1728327beb_hd.jpg">
+<meta property="og:image" content="https://pic1.zhimg.com/80/v2-4e0bf37ecad2f306fe09d32a2d37d908_hd.jpg">
+<meta property="og:updated_time" content="2019-12-17T11:33:38.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ResNets">
+<meta name="twitter:description" content="引言深度残差网络（Deep residual network, ResNet）的提出是CNN图像史上的一件里程碑事件，让我们先看一下ResNet在ILSVRC和COCO 2015上的战绩： 图1 ResNet在ILSVRC和COCO 2015上的战绩 ResNet取得了5项第一，并又一次刷新了CNN模型在ImageNet上的历史： 图2 ImageNet分类Top-5误差 ResNet的作者何凯明">
+<meta name="twitter:image" content="https://pic1.zhimg.com/80/v2-5e98ec97def099a4e6fb6b7ce3b1d460_hd.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://xiaohaoke.top/2019/12/17/ResNets/">
+
+
+
+
+
+  <title>ResNets | xiaohaoke's blog</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">xiaohaoke's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://xiaohaoke.top/2019/12/17/ResNets/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xiaohaoke">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/uploads/logo.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xiaohaoke's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ResNets</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-17T19:32:01+08:00">
+                2019-12-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/12/17/ResNets/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/17/ResNets/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>深度残差网络（Deep residual network, ResNet）的提出是CNN图像史上的一件里程碑事件，让我们先看一下ResNet在ILSVRC和COCO 2015上的战绩：</p>
+<p><img src="https://pic1.zhimg.com/80/v2-5e98ec97def099a4e6fb6b7ce3b1d460_hd.jpg" alt="img">图1 ResNet在ILSVRC和COCO 2015上的战绩</p>
+<p>ResNet取得了5项第一，并又一次刷新了CNN模型在ImageNet上的历史：</p>
+<p><img src="https://pic3.zhimg.com/80/v2-606573bdaaa97de6b8b10fb00f76d29a_hd.jpg" alt="img">图2 ImageNet分类Top-5误差</p>
+<p>ResNet的作者<a href="http://kaiminghe.com/" target="_blank" rel="noopener">何凯明</a>也因此摘得CVPR2016最佳论文奖，当然何博士的成就远不止于此，感兴趣的可以去搜一下他后来的辉煌战绩。那么ResNet为什么会有如此优异的表现呢？其实ResNet是解决了深度CNN模型难训练的问题，从图2中可以看到14年的VGG才19层，而15年的ResNet多达152层，这在网络深度完全不是一个量级上，所以如果是第一眼看这个图的话，肯定会觉得ResNet是靠深度取胜。事实当然是这样，但是ResNet还有架构上的trick，这才使得网络的深度发挥出作用，这个trick就是残差学习（Residual learning）。下面详细讲述ResNet的理论及实现。<br><a id="more"></a></p>
+<h2 id="深度网络的退化问题"><a href="#深度网络的退化问题" class="headerlink" title="深度网络的退化问题"></a>深度网络的退化问题</h2><p>从经验来看，网络的深度对模型的性能至关重要，当增加网络层数后，网络可以进行更加复杂的特征模式的提取，所以当模型更深时理论上可以取得更好的结果，从图2中也可以看出网络越深而效果越好的一个实践证据。但是更深的网络其性能一定会更好吗？实验发现深度网络出现了退化问题（Degradation problem）：<strong><u>网络深度增加时，网络准确度出现饱和，甚至出现下降。</u></strong>这个现象可以在图3中直观看出来：56层的网络比20层网络效果还要差。这不会是过拟合问题，因为56层网络的训练误差同样高。我们知道深层网络存在着梯度消失或者爆炸的问题，这使得深度学习模型很难训练。但是现在已经存在一些技术手段如BatchNorm来缓解这个问题。因此，出现深度网络的退化问题是非常令人诧异的。</p>
+<p><img src="https://pic2.zhimg.com/80/v2-dcf5688dad675cbe8fb8be243af5e1fd_hd.jpg" alt="img">图3 20层与56层网络在CIFAR-10上的误差</p>
+<h2 id="残差学习"><a href="#残差学习" class="headerlink" title="残差学习"></a>残差学习</h2><p>深度网络的退化问题至少说明深度网络不容易训练。但是我们考虑这样一个事实：现在你有一个浅层网络，你想通过向上堆积新层来建立深层网络，一个极端情况是这些增加的层什么也不学习，仅仅复制浅层网络的特征，即这样新层是恒等映射（Identity mapping）。在这种情况下，深层网络应该至少和浅层网络性能一样，也不应该出现退化现象。好吧，你不得不承认肯定是目前的训练方法有问题，才使得深层网络很难去找到一个好的参数。</p>
+<p>这个有趣的假设让何博士灵感爆发，他提出了<strong><u>残差学习来解决退化问题</u></strong>。对于一个堆积层结构（几层堆积而成）当输入为 <img src="https://www.zhihu.com/equation?tex=x" alt="[公式]"> 时其学习到的特征记为 <img src="https://www.zhihu.com/equation?tex=H%28x%29" alt="[公式]"> ，现在我们希望其可以学习到残差 <img src="https://www.zhihu.com/equation?tex=F%28x%29%3DH%28x%29-x" alt="[公式]"> ，这样其实原始的学习特征是 <img src="https://www.zhihu.com/equation?tex=F%28x%29%2Bx" alt="[公式]"> 。之所以这样是因为残差学习相比原始特征直接学习更容易。当残差为0时，此时堆积层仅仅做了恒等映射，至少网络性能不会下降，实际上残差不会为0，这也会使得堆积层在输入特征基础上学习到新的特征，从而拥有更好的性能。残差学习的结构如图4所示。这有点类似与电路中的“短路”，所以是一种短路连接（shortcut connection）。</p>
+<p><img src="https://pic4.zhimg.com/80/v2-252e6d9979a2a91c2d3033b9b73eb69f_hd.jpg" alt="img">图4 残差学习单元</p>
+<p>为什么残差学习相对更容易，从直观上看残差学习需要学习的内容少，因为残差一般会比较小，学习难度小点。不过我们可以从数学的角度来分析这个问题，首先残差单元可以表示为：</p>
+<p><img src="https://www.zhihu.com/equation?tex=%5Cbegin%7Balign%7D+%26+%7B%7By%7D_%7Bl%7D%7D%3Dh%28%7B%7Bx%7D_%7Bl%7D%7D%29%2BF%28%7B%7Bx%7D_%7Bl%7D%7D%2C%7B%7BW%7D_%7Bl%7D%7D%29+%5C%5C+%26+%7B%7Bx%7D_%7Bl%2B1%7D%7D%3Df%28%7B%7By%7D_%7Bl%7D%7D%29+%5C%5C+%5Cend%7Balign%7D+" alt="[公式]"></p>
+<p>其中 <img src="https://www.zhihu.com/equation?tex=x_%7Bl%7D" alt="[公式]"> 和 <img src="https://www.zhihu.com/equation?tex=x_%7Bl%2B1%7D" alt="[公式]"> 分别表示的是第 <img src="https://www.zhihu.com/equation?tex=l" alt="[公式]"> 个残差单元的输入和输出，注意每个残差单元一般包含多层结构。 <img src="https://www.zhihu.com/equation?tex=F" alt="[公式]"> 是残差函数，表示学习到的残差，而 <img src="https://www.zhihu.com/equation?tex=h%28x_%7Bl%7D%29%3Dx_%7Bl%7D" alt="[公式]"> 表示恒等映射， <img src="https://www.zhihu.com/equation?tex=f" alt="[公式]"> 是ReLU激活函数。基于上式，我们求得从浅层 <img src="https://www.zhihu.com/equation?tex=l" alt="[公式]"> 到深层 <img src="https://www.zhihu.com/equation?tex=L" alt="[公式]"> 的学习特征为：</p>
+<p><img src="https://www.zhihu.com/equation?tex=%7B%7Bx%7D_%7BL%7D%7D%3D%7B%7Bx%7D_%7Bl%7D%7D%2B%5Csum%5Climits_%7Bi%3Dl%7D%5E%7BL-1%7D%7BF%28%7B%7Bx%7D_%7Bi%7D%7D%7D%2C%7B%7BW%7D_%7Bi%7D%7D%29" alt="[公式]"></p>
+<p>利用链式规则，可以求得反向过程的梯度：</p>
+<p><img src="https://www.zhihu.com/equation?tex=%5Cfrac%7B%5Cpartial+loss%7D%7B%5Cpartial+%7B%7Bx%7D_%7Bl%7D%7D%7D%3D%5Cfrac%7B%5Cpartial+loss%7D%7B%5Cpartial+%7B%7Bx%7D_%7BL%7D%7D%7D%5Ccdot+%5Cfrac%7B%5Cpartial+%7B%7Bx%7D_%7BL%7D%7D%7D%7B%5Cpartial+%7B%7Bx%7D_%7Bl%7D%7D%7D%3D%5Cfrac%7B%5Cpartial+loss%7D%7B%5Cpartial+%7B%7Bx%7D_%7BL%7D%7D%7D%5Ccdot+%5Cleft%28+1%2B%5Cfrac%7B%5Cpartial+%7D%7B%5Cpartial+%7B%7Bx%7D_%7BL%7D%7D%7D%5Csum%5Climits_%7Bi%3Dl%7D%5E%7BL-1%7D%7BF%28%7B%7Bx%7D_%7Bi%7D%7D%2C%7B%7BW%7D_%7Bi%7D%7D%29%7D+%5Cright%29" alt="[公式]"></p>
+<p>式子的第一个因子 <img src="https://www.zhihu.com/equation?tex=%5Cfrac%7B%5Cpartial+loss%7D%7B%5Cpartial+%7B%7Bx%7D_%7BL%7D%7D%7D" alt="[公式]"> 表示的损失函数到达 <img src="https://www.zhihu.com/equation?tex=L" alt="[公式]"> 的梯度，小括号中的1表明短路机制可以无损地传播梯度，而另外一项残差梯度则需要经过带有weights的层，梯度不是直接传递过来的。残差梯度不会那么巧全为-1，而且就算其比较小，有1的存在也不会导致梯度消失。所以残差学习会更容易。要注意上面的推导并不是严格的证明。</p>
+<h2 id="ResNet的网络结构"><a href="#ResNet的网络结构" class="headerlink" title="ResNet的网络结构"></a>ResNet的网络结构</h2><p>ResNet网络是参考了VGG19网络，在其基础上进行了修改，并通过短路机制加入了残差单元，如图5所示。变化主要体现在ResNet直接使用stride=2的卷积做下采样，并且用global average pool层替换了全连接层。ResNet的一个重要设计原则是：当feature map大小降低一半时，feature map的数量增加一倍，这保持了网络层的复杂度。从图5中可以看到，ResNet相比普通网络每两层间增加了短路机制，这就形成了残差学习，其中虚线表示feature map数量发生了改变。图5展示的34-layer的ResNet，还可以构建更深的网络如表1所示。从表中可以看到，对于18-layer和34-layer的ResNet，其进行的两层间的残差学习，当网络更深时，其进行的是三层间的残差学习，三层卷积核分别是1x1，3x3和1x1，一个值得注意的是隐含层的feature map数量是比较小的，并且是输出feature map数量的1/4。</p>
+<p><img src="https://pic2.zhimg.com/80/v2-7cb9c03871ab1faa7ca23199ac403bd9_hd.jpg" alt="img">图5 ResNet网络结构图</p>
+<p><img src="https://pic1.zhimg.com/80/v2-1dfd4022d4be28392ff44c49d6b4ed94_hd.jpg" alt="img">表1 不同深度的ResNet</p>
+<p>下面我们再分析一下残差单元，ResNet使用两种残差单元，如图6所示。左图对应的是浅层网络，而右图对应的是深层网络。对于短路连接，当输入和输出维度一致时，可以直接将输入加到输出上。但是当维度不一致时（对应的是维度增加一倍），这就不能直接相加。有两种策略：（1）采用zero-padding增加维度，此时一般要先做一个downsamp，可以采用strde=2的pooling，这样不会增加参数；（2）采用新的映射（projection shortcut），一般采用1x1的卷积，这样会增加参数，也会增加计算量。短路连接除了直接使用恒等映射，当然都可以采用projection shortcut。</p>
+<p><img src="https://pic1.zhimg.com/80/v2-0892e5423616c30f69ded61111b111c0_hd.jpg" alt="img">图6 不同的残差单元</p>
+<p>作者对比18-layer和34-layer的网络效果，如图7所示。可以看到普通的网络出现退化现象，但是ResNet很好的解决了退化问题。</p>
+<p><img src="https://pic2.zhimg.com/80/v2-ac88d9e118e3a85922188daba84f7efd_hd.jpg" alt="img">图7 18-layer和34-layer的网络效果</p>
+<p>最后展示一下ResNet网络与其他网络在ImageNet上的对比结果，如表2所示。可以看到ResNet-152其误差降到了4.49%，当采用集成模型后，误差可以降到3.57%。</p>
+<p><img src="https://pic4.zhimg.com/80/v2-0a2c8a209a221817f91c1f1728327beb_hd.jpg" alt="img">表2 ResNet与其他网络的对比结果</p>
+<p>说一点关于残差单元题外话，上面我们说到了短路连接的几种处理方式，其实作者在<a href="https://arxiv.org/abs/1603.05027" target="_blank" rel="noopener">文献[2]</a>中又对不同的残差单元做了细致的分析与实验，这里我们直接抛出最优的残差结构，如图8所示。改进前后一个明显的变化是采用pre-activation，BN和ReLU都提前了。而且作者推荐短路连接采用恒等变换，这样保证短路连接不会有阻碍。感兴趣的可以去读读这篇文章。</p>
+<p><img src="https://pic1.zhimg.com/80/v2-4e0bf37ecad2f306fe09d32a2d37d908_hd.jpg" alt="img">图8 改进后的残差单元及效果</p>
+<h2 id="ResNet的TensorFlow实现"><a href="#ResNet的TensorFlow实现" class="headerlink" title="ResNet的TensorFlow实现"></a>ResNet的TensorFlow实现</h2><p>这里给出ResNet50的TensorFlow实现，模型的实现参考了<a href="https://github.com/KaimingHe/deep-residual-networks" target="_blank" rel="noopener">Caffe版本</a>的实现，核心代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ResNet50</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, inputs, num_classes=<span class="number">1000</span>, is_training=True,</span></span></span><br><span class="line"><span class="function"><span class="params">                 scope=<span class="string">"resnet50"</span>)</span>:</span></span><br><span class="line">        self.inputs =inputs</span><br><span class="line">        self.is_training = is_training</span><br><span class="line">        self.num_classes = num_classes</span><br><span class="line"></span><br><span class="line">        <span class="keyword">with</span> tf.variable_scope(scope):</span><br><span class="line">            <span class="comment"># construct the model</span></span><br><span class="line">            net = conv2d(inputs, <span class="number">64</span>, <span class="number">7</span>, <span class="number">2</span>, scope=<span class="string">"conv1"</span>) <span class="comment"># -&gt; [batch, 112, 112, 64]</span></span><br><span class="line">            net = tf.nn.relu(batch_norm(net, is_training=self.is_training, scope=<span class="string">"bn1"</span>))</span><br><span class="line">            net = max_pool(net, <span class="number">3</span>, <span class="number">2</span>, scope=<span class="string">"maxpool1"</span>)  <span class="comment"># -&gt; [batch, 56, 56, 64]</span></span><br><span class="line">            net = self._block(net, <span class="number">256</span>, <span class="number">3</span>, init_stride=<span class="number">1</span>, is_training=self.is_training,</span><br><span class="line">                              scope=<span class="string">"block2"</span>)           <span class="comment"># -&gt; [batch, 56, 56, 256]</span></span><br><span class="line">            net = self._block(net, <span class="number">512</span>, <span class="number">4</span>, is_training=self.is_training, scope=<span class="string">"block3"</span>)</span><br><span class="line">                                                        <span class="comment"># -&gt; [batch, 28, 28, 512]</span></span><br><span class="line">            net = self._block(net, <span class="number">1024</span>, <span class="number">6</span>, is_training=self.is_training, scope=<span class="string">"block4"</span>)</span><br><span class="line">                                                        <span class="comment"># -&gt; [batch, 14, 14, 1024]</span></span><br><span class="line">            net = self._block(net, <span class="number">2048</span>, <span class="number">3</span>, is_training=self.is_training, scope=<span class="string">"block5"</span>)</span><br><span class="line">                                                        <span class="comment"># -&gt; [batch, 7, 7, 2048]</span></span><br><span class="line">            net = avg_pool(net, <span class="number">7</span>, scope=<span class="string">"avgpool5"</span>)    <span class="comment"># -&gt; [batch, 1, 1, 2048]</span></span><br><span class="line">            net = tf.squeeze(net, [<span class="number">1</span>, <span class="number">2</span>], name=<span class="string">"SpatialSqueeze"</span>) <span class="comment"># -&gt; [batch, 2048]</span></span><br><span class="line">            self.logits = fc(net, self.num_classes, <span class="string">"fc6"</span>)       <span class="comment"># -&gt; [batch, num_classes]</span></span><br><span class="line">            self.predictions = tf.nn.softmax(self.logits)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_block</span><span class="params">(self, x, n_out, n, init_stride=<span class="number">2</span>, is_training=True, scope=<span class="string">"block"</span>)</span>:</span></span><br><span class="line">        <span class="keyword">with</span> tf.variable_scope(scope):</span><br><span class="line">            h_out = n_out // <span class="number">4</span></span><br><span class="line">            out = self._bottleneck(x, h_out, n_out, stride=init_stride,</span><br><span class="line">                                   is_training=is_training, scope=<span class="string">"bottlencek1"</span>)</span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>, n):</span><br><span class="line">                out = self._bottleneck(out, h_out, n_out, is_training=is_training,</span><br><span class="line">                                       scope=(<span class="string">"bottlencek%s"</span> % (i + <span class="number">1</span>)))</span><br><span class="line">            <span class="keyword">return</span> out</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_bottleneck</span><span class="params">(self, x, h_out, n_out, stride=None, is_training=True, scope=<span class="string">"bottleneck"</span>)</span>:</span></span><br><span class="line">        <span class="string">""" A residual bottleneck unit"""</span></span><br><span class="line">        n_in = x.get_shape()[<span class="number">-1</span>]</span><br><span class="line">        <span class="keyword">if</span> stride <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            stride = <span class="number">1</span> <span class="keyword">if</span> n_in == n_out <span class="keyword">else</span> <span class="number">2</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">with</span> tf.variable_scope(scope):</span><br><span class="line">            h = conv2d(x, h_out, <span class="number">1</span>, stride=stride, scope=<span class="string">"conv_1"</span>)</span><br><span class="line">            h = batch_norm(h, is_training=is_training, scope=<span class="string">"bn_1"</span>)</span><br><span class="line">            h = tf.nn.relu(h)</span><br><span class="line">            h = conv2d(h, h_out, <span class="number">3</span>, stride=<span class="number">1</span>, scope=<span class="string">"conv_2"</span>)</span><br><span class="line">            h = batch_norm(h, is_training=is_training, scope=<span class="string">"bn_2"</span>)</span><br><span class="line">            h = tf.nn.relu(h)</span><br><span class="line">            h = conv2d(h, n_out, <span class="number">1</span>, stride=<span class="number">1</span>, scope=<span class="string">"conv_3"</span>)</span><br><span class="line">            h = batch_norm(h, is_training=is_training, scope=<span class="string">"bn_3"</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> n_in != n_out:</span><br><span class="line">                shortcut = conv2d(x, n_out, <span class="number">1</span>, stride=stride, scope=<span class="string">"conv_4"</span>)</span><br><span class="line">                shortcut = batch_norm(shortcut, is_training=is_training, scope=<span class="string">"bn_4"</span>)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                shortcut = x</span><br><span class="line">            <span class="keyword">return</span> tf.nn.relu(shortcut + h)</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/12/17/Tensor/" rel="next" title="Tensor">
+                <i class="fa fa-chevron-left"></i> Tensor
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/12/17/ResNet/" rel="prev" title="ResNet残差网络">
+                ResNet残差网络 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/uploads/logo.jpg" alt="xiaohaoke">
+            
+              <p class="site-author-name" itemprop="name">xiaohaoke</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#深度网络的退化问题"><span class="nav-number">2.</span> <span class="nav-text">深度网络的退化问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#残差学习"><span class="nav-number">3.</span> <span class="nav-text">残差学习</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ResNet的网络结构"><span class="nav-number">4.</span> <span class="nav-text">ResNet的网络结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ResNet的TensorFlow实现"><span class="nav-number">5.</span> <span class="nav-text">ResNet的TensorFlow实现</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xiaohaoke</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://xiaohaoke.top/2019/12/17/ResNets/';
+          this.page.identifier = '2019/12/17/ResNets/';
+          this.page.title = 'ResNets';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
